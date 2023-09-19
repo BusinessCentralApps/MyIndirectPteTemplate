@@ -1,4 +1,8 @@
 {
   "type": "PTE",
-  "templateUrl": "https://github.com/freddydk/AL-Go@custom"
+  "templateUrl": "https://github.com/freddydk/AL-Go@custom",
+  "useCompilerFolder": true,
+  "doNotPublishApps": true,
+  "runs-on": "ubuntu-latest",
+  "gitHubRunner": "ubuntu-latest"
 }
