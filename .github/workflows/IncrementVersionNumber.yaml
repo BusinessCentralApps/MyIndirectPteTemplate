@@ -10,8 +10,13 @@ on:
         required: false
         default: '*'
       versionNumber:
-        description: Updated Version Number. Use Major.Minor for absolute change, use +Major.Minor for incremental change.
-        required: true
+        description: New Version Number in main branch. Use Major.Minor (optionally add .Build for versioningstrategy 3) for absolute change, or +1, +0.1 (or +0.0.1 for versioningstrategy 3) incremental change.
+        required: false
+        default: ''
+      skipUpdatingDependencies:
+        description: Skip updating dependency version numbers in all apps.
+        type: boolean
+        default: false
       directCommit:
         description: Direct Commit?
         type: boolean
@@ -20,10 +25,6 @@ on:
         description: Use GhTokenWorkflow for PR/Commit?
         type: boolean
         default: false
-
-permissions:
-  contents: write
-  pull-requests: write
 
 defaults:
   run:
@@ -37,6 +38,11 @@ jobs:
   IncrementVersionNumber:
     needs: [ ]
     runs-on: [ ubuntu-latest ]
+    permissions:
+      actions: read
+      contents: write
+      id-token: write
+      pull-requests: write
     steps:
       - name: Dump Workflow Information
         uses: freddydk/AL-Go/Actions/DumpWorkflowInfo@customize
@@ -44,14 +50,13 @@ jobs:
           shell: pwsh
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Initialize the workflow
         id: init
         uses: freddydk/AL-Go/Actions/WorkflowInitialize@customize
         with:
           shell: pwsh
-          eventId: "DO0096"
 
       - name: Read settings
         uses: freddydk/AL-Go/Actions/ReadSettings@customize
@@ -72,15 +77,17 @@ jobs:
         with:
           shell: pwsh
           token: ${{ steps.ReadSecrets.outputs.TokenForPush }}
-          parentTelemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
           projects: ${{ github.event.inputs.projects }}
           versionNumber: ${{ github.event.inputs.versionNumber }}
+          skipUpdatingDependencies: ${{ github.event.inputs.skipUpdatingDependencies }}
           directCommit: ${{ github.event.inputs.directCommit }}
 
       - name: Finalize the workflow
         if: always()
         uses: freddydk/AL-Go/Actions/WorkflowPostProcess@customize
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         with:
           shell: pwsh
-          eventId: "DO0096"
           telemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
+          currentJobContext: ${{ toJson(job) }}
