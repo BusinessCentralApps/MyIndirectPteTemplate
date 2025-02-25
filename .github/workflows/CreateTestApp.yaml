@@ -34,7 +34,9 @@ on:
         default: false
 
 permissions:
+  actions: read
   contents: write
+  id-token: write
   pull-requests: write
 
 defaults:
@@ -56,14 +58,13 @@ jobs:
           shell: pwsh
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Initialize the workflow
         id: init
         uses: freddydk/AL-Go/Actions/WorkflowInitialize@customize
         with:
           shell: pwsh
-          eventId: "DO0095"
 
       - name: Read settings
         uses: freddydk/AL-Go/Actions/ReadSettings@customize
@@ -84,7 +85,6 @@ jobs:
         with:
           shell: pwsh
           token: ${{ steps.ReadSecrets.outputs.TokenForPush }}
-          parentTelemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
           project: ${{ github.event.inputs.project }}
           type: 'Test App'
           name: ${{ github.event.inputs.name }}
@@ -96,7 +96,9 @@ jobs:
       - name: Finalize the workflow
         if: always()
         uses: freddydk/AL-Go/Actions/WorkflowPostProcess@customize
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         with:
           shell: pwsh
-          eventId: "DO0095"
           telemetryScopeJson: ${{ steps.init.outputs.telemetryScopeJson }}
+          currentJobContext: ${{ toJson(job) }}
