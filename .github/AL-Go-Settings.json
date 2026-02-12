@@ -5,5 +5,6 @@
   "doNotPublishApps": true,
   "runs-on": "ubuntu-latest",
   "gitHubRunner": "ubuntu-latest",
-  "templateSha": "788f20c0173ac07dc443f3d41b3fb59de3fed080"
+  "templateSha": "788f20c0173ac07dc443f3d41b3fb59de3fed080",
+  "PullRequestTrigger": "pull_request"
 }
